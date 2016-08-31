@@ -198,6 +198,7 @@ function renderResults($hash)
 
 	return $downloadbuttons.$permalink.
 	'<h2> Empfohlene Vorgehensweise</h2>
+	<h4><strong>Schritt 0:</strong> Ein Backup des Domaincontrollers machen (sicher ist sicher)!!</h4>
 	<h4><strong>Schritt 1:</strong> Alle bestehenden Schülerkonten deaktivieren (im AD alle markieren -> rechte Maustaste-> Deaktivieren)</h4>
 	<h4><strong>Schritt 2:</strong> Den Inhalt der domaincontroller.txt markieren und rechte Maustaste -> "Kopieren". Dann auf dem Domaincontroller eine Eingabeaufforderung (cmd) als Administrator aufmachen eingeben (rechte maustaste->einfügen) (nicht als .bat ausführen! Das wird Probleme mit Umlauten machen)</h4>
 	<h4><strong>Schritt 2.1 (wenn Gruppen angelegt werden sollen):</strong> Auf dem Domaincontroller das Script emails_for_groups.ps1 mit Powershell ausführen</h4>

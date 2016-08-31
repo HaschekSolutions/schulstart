@@ -55,7 +55,7 @@
       <!-- Main jumbotron for a primary marketing message or call to action -->
       <div class="jumbotron">
         <h1>Schulstart</h1>
-        <p>Schulstart ist eine Hilfestellung für Schuladmins, die jedes Jahr viele Schüler und Gruppen einpflegen müssen. Man läd das CSV (Export aus Sokrates) hinauf, wählt einige Einstellungen und erhält dann mehrere Scripts, die man auf den Servern einfach ausführen kann um benutzer/gruppen usw zu setzen.</p>
+        <p> Schulstart ist eine Hilfestellung für Schul-Admins, die jedes Jahr viele Schüler und Gruppen einpflegen müssen. Man lädt das CSV (Export aus Sokrates) hinauf, wählt einige Einstellungen und erhält dann mehrere Scripts, die man auf den Servern einfach ausführen kann um Benutzer/Gruppen usw. zu setzen.</p>
       </div>
       
       <?php
