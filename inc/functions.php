@@ -31,27 +31,27 @@ function controller()
 		switch($_POST['csv_aufbau'])
 		{
 			case 1:
-				$class = $a[2];
-				$last= mb_convert_case(lower($a[1]), MB_CASE_TITLE, "UTF-8");
-				$first = mb_convert_case(lower($a[0]), MB_CASE_TITLE, "UTF-8");
+				$class = mb_trim($a[2]);
+				$last= mb_trim(mb_convert_case(lower($a[1]), MB_CASE_TITLE, "UTF-8"));
+				$first = mb_trim(mb_convert_case(lower($a[0]), MB_CASE_TITLE, "UTF-8"));
 			break;
 
 			case 2:
 				$class = $a[2];
-				$last= mb_convert_case(lower($a[0]), MB_CASE_TITLE, "UTF-8");
-				$first = mb_convert_case(lower($a[1]), MB_CASE_TITLE, "UTF-8");
+				$last= mb_trim(mb_convert_case(lower($a[0]), MB_CASE_TITLE, "UTF-8"));
+				$first = mb_trim(mb_convert_case(lower($a[1]), MB_CASE_TITLE, "UTF-8"));
 			break;
 
 			case 3:
-				$class = $a[0];
-				$last= mb_convert_case(lower($a[1]), MB_CASE_TITLE, "UTF-8");
-				$first = mb_convert_case(lower($a[2]), MB_CASE_TITLE, "UTF-8");
+				$class = mb_trim($a[0]);
+				$last= mb_trim(mb_convert_case(lower($a[1]), MB_CASE_TITLE, "UTF-8"));
+				$first = mb_trim(mb_convert_case(lower($a[2]), MB_CASE_TITLE, "UTF-8"));
 			break;
 
 			default:
-				$class = $a[0];
-				$last= mb_convert_case(lower($a[2]), MB_CASE_TITLE, "UTF-8");
-				$first = mb_convert_case(lower($a[1]), MB_CASE_TITLE, "UTF-8");
+				$class = mb_trim($a[0]);
+				$last= mb_trim(mb_convert_case(lower($a[2]), MB_CASE_TITLE, "UTF-8"));
+				$first = mb_trim(mb_convert_case(lower($a[1]), MB_CASE_TITLE, "UTF-8"));
 		}
 
 		if(!$class && !$last && !$first) continue;
@@ -465,3 +465,33 @@ function saveFile($filename,$data,$append=false)
 	fwrite($fp,toISO($data)."\r\n");
 	fclose($fp);
 }
+
+function mb_trim($string, $charlist='\\\\s', $ltrim=true, $rtrim=true) 
+    { 
+        $both_ends = $ltrim && $rtrim; 
+
+        $char_class_inner = preg_replace( 
+            array( '/[\^\-\]\\\]/S', '/\\\{4}/S' ), 
+            array( '\\\\\\0', '\\' ), 
+            $charlist 
+        ); 
+
+        $work_horse = '[' . $char_class_inner . ']+'; 
+        $ltrim && $left_pattern = '^' . $work_horse; 
+        $rtrim && $right_pattern = $work_horse . '$'; 
+
+        if($both_ends) 
+        { 
+            $pattern_middle = $left_pattern . '|' . $right_pattern; 
+        } 
+        elseif($ltrim) 
+        { 
+            $pattern_middle = $left_pattern; 
+        } 
+        else 
+        { 
+            $pattern_middle = $right_pattern; 
+        } 
+
+        return preg_replace("/$pattern_middle/usSD", '', $string); 
+    } 
