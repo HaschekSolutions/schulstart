@@ -459,13 +459,9 @@ function saveFile($filename,$data,$append=false)
 		$data = implode("\r\n",$data);
 		
 	$mode = ($append?'a':'w');
-
-	if($mode=='w')
-		file_put_contents($filename, "\xEF\xBB\xBF". $data); 
-	else 
-	{
-		$fp = fopen($filename,$mode);
-		fwrite($fp,toISO($data)."\r\n");
-		fclose($fp);
-	}
+	
+	$fp = fopen($filename,$mode);
+	fwrite($fp, pack("CCC",0xef,0xbb,0xbf)); 
+    fwrite($fp,$data."\r\n"); 
+    fclose($fp);
 }
