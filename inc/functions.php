@@ -2,9 +2,7 @@
 	
 function controller()
 {
-	$html = new HTML;
-	
-	
+	$html = new HTML;	
 	
 	// save csv
 	$uploaddir = 'tmp/';
@@ -46,15 +44,17 @@ function controller()
 
 			case 3:
 				$class = $a[0];
-				$last= mb_convert_case(lower($a[0]), MB_CASE_TITLE, "UTF-8");
-				$first = mb_convert_case(lower($a[1]), MB_CASE_TITLE, "UTF-8");
+				$last= mb_convert_case(lower($a[1]), MB_CASE_TITLE, "UTF-8");
+				$first = mb_convert_case(lower($a[2]), MB_CASE_TITLE, "UTF-8");
 			break;
 
 			default:
 				$class = $a[0];
-				$last= mb_convert_case(lower($a[1]), MB_CASE_TITLE, "UTF-8");
+				$last= mb_convert_case(lower($a[2]), MB_CASE_TITLE, "UTF-8");
 				$first = mb_convert_case(lower($a[1]), MB_CASE_TITLE, "UTF-8");
 		}
+
+		if(!$class && !$last && !$first) continue;
 
 		//calculated stuff
 		$username = mb_substr(makeUsername($first,$last),0,20,'utf-8');
@@ -155,13 +155,38 @@ function controller()
 	
 	saveFile($dlpath."fileserver.txt",$homerights);
 	saveFile($dlpath."fileserver.txt",$classshare,true);
+
+	$fp = fopen($dlpath.'table.json','w');
+	fwrite($fp,json_encode($t));
+	fclose($fp);
 	
+	/*
 	$downloadbuttons = $html->link('Download domaincontroller.txt',$dlpath."domaincontroller.txt").' ';
 	if($_POST['createclassgroups'])
 		$downloadbuttons.= $html->link('Download emails_for_groups.ps1',$dlpath."emails_for_groups.ps1").' ';
 	$downloadbuttons.= $html->link('Download fileserver.txt',$dlpath."fileserver.txt").' ';
 	$downloadbuttons.= $html->link('Download Klassenlisten.zip',$zipfilename);
-	
+	*/
+
+	//return renderResults($hash);
+	return $html->goToLocation('?h='.$hash);
+}
+
+function renderResults($hash)
+{
+	$basedir = ROOT.DS.'tmp'.DS.$hash;
+	if(!is_dir($basedir))
+		exit('Fehler');
+	$html = new HTML;
+
+	$downloadbuttons = $html->link('Download domaincontroller.txt','downloader.php?h='.$hash."&f=domaincontroller.txt").' ';
+	if(file_exists($basedir.DS.'emails_for_groups.ps1'))
+		$downloadbuttons.= $html->link('Download emails_for_groups.ps1','downloader.php?h='.$hash."&emails_for_groups.ps1").' ';
+	$downloadbuttons.= $html->link('Download fileserver.txt','downloader.php?h='.$hash."&fileserver.txt").' ';
+	$downloadbuttons.= $html->link('Download Klassenlisten.zip',$zipfilename);
+
+	$table = json_decode(implode(NULL,file($basedir.DS.'table.json')),true);
+
 	return $downloadbuttons.
 	'<h2> Empfohlene Vorgehensweise</h2>
 	<h4><strong>Schritt 1:</strong> Alle bestehenden Schülerkonten deaktivieren (im AD alle markieren -> rechte Maustaste-> Deaktivieren)</h4>
@@ -175,7 +200,7 @@ function controller()
 		<li>Bestehende Benutzerkonten werden NICHT mit dem neuen Passwort versehen</li>
 		<li>Bestehende Klassenordner werden nicht geleert oder verschoben! Das sollte man am besten händisch vor dem Import machen</li>
 	</ul>
-	'.$html->table($t);
+	'.$html->table($table);
 }
 
 function upper($string)
