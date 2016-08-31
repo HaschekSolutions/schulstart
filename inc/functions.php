@@ -459,9 +459,13 @@ function saveFile($filename,$data,$append=false)
 		$data = implode("\r\n",$data);
 		
 	$mode = ($append?'a':'w');
+
+	if($mode=='w' || !file_exists($filename))
+		$makeUTF8magic = true;
+	else $makeUTF8magic = false;
 	
 	$fp = fopen($filename,$mode);
-	if($mode=='w' || !file_exists($filename))
+	if($makeUTF8magic)
 		fwrite($fp, pack("CCC",0xef,0xbb,0xbf)); 
     fwrite($fp,$data."\r\n"); 
     fclose($fp);
