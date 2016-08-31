@@ -461,7 +461,8 @@ function saveFile($filename,$data,$append=false)
 	$mode = ($append?'a':'w');
 	
 	$fp = fopen($filename,$mode);
-	fwrite($fp, pack("CCC",0xef,0xbb,0xbf)); 
+	if($mode=='w' || !file_exists($filename))
+		fwrite($fp, pack("CCC",0xef,0xbb,0xbf)); 
     fwrite($fp,$data."\r\n"); 
     fclose($fp);
 }
