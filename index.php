@@ -3,6 +3,9 @@
 
   define('DS', DIRECTORY_SEPARATOR);
   define('ROOT', dirname(__FILE__));
+
+  error_reporting(E_ALL & ~E_NOTICE);
+  ini_set('display_errors','On');
   
   include_once('inc/Encoding.php');
 		use \ForceUTF8\Encoding;
@@ -30,8 +33,7 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/> 
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
-    <title>CSV 2 AD</title>
+    <title>Schulstart</title>
 
     <!-- Bootstrap -->
     <link href="css/bootstrap.min.css" rel="stylesheet">
@@ -52,8 +54,8 @@
 
       <!-- Main jumbotron for a primary marketing message or call to action -->
       <div class="jumbotron">
-        <h1>CSV 2 AD</h1>
-        <p>CSV2 AD ist eine Hilfestellung für Schuladmins, die jedes Jahr viele Schüler und Gruppen einpflegen müssen. Man läd das CSV (Export aus Sokrates) hinauf, wählt einige Einstellungen und erhält dann mehrere Scripts, die man auf den Servern einfach ausführen kann um benutzer/gruppen usw zu setzen.</p>
+        <h1>Schulstart</h1>
+        <p>Schulstart ist eine Hilfestellung für Schuladmins, die jedes Jahr viele Schüler und Gruppen einpflegen müssen. Man läd das CSV (Export aus Sokrates) hinauf, wählt einige Einstellungen und erhält dann mehrere Scripts, die man auf den Servern einfach ausführen kann um benutzer/gruppen usw zu setzen.</p>
       </div>
       
       <?php

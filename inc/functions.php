@@ -10,7 +10,7 @@ function controller()
 	if(!move_uploaded_file($_FILES['csv']['tmp_name'], $uploadfile))
 		return $html->error('CSV Konnte nicht gesichert werden');
 		
-	$hash = mb_substr(md5(basename($_FILES['csv']['name'])),0,6);
+	$hash = mb_substr(sha1(rand(0,100000)+time().time().basename($_FILES['csv']['name'])),0,8);
 	
 	$dlpath ='tmp/'.$hash.'/';
 	if(!is_dir($dlpath)) 
@@ -87,8 +87,12 @@ function controller()
 			}
 		}
 		
-		$mkuser[] = 'dsadd user "cn='.$username.','.$ou.'" -samid '.$username.' -hmdrv H: -hmdir "'.$homedir_unc.'" -upn '.$username.'@'.$domainname.' -fn "'.$first.'" -ln "'.$last.'" -email "'.$email.'" -display "'.upper($last).' '.$first.'" -pwd '.$password.' -mustchpwd yes -disabled no';
-		$moduser[] = 'dsmod user "cn='.$username.','.$ou.'" -upn '.$username.'@'.$domainname.' -display "'.upper($last).' '.$first.'" -disabled no -email "'.$email.'" -fn "'.$first.'" -ln "'.$last.'"';
+		$mkuser[] = 'dsadd user "cn='.$username.','.$ou.'" -samid '.$username.' -hmdrv H: -hmdir "'.$homedir_unc.'" -upn '.$username.'@'.$domainname.' -fn "'.$first.'" -ln "'.$last.'" -email "'.$email.'" -display "'.upper($last).' '.$first.'" -pwd '.$password.' -mustchpwd '.(($_POST['mustchangepw']==1)?'yes':'no').' -disabled no -canchpwd '.(($_POST['cantchangepw']=='1')?'no':'yes');
+		
+		if($_POST['forcepwallusers']=='1')
+			$forcepw = ' -pwd '.$password.' -mustchpwd '.(($_POST['mustchangepw']==1)?'yes':'no').' -canchpwd '.(($_POST['cantchangepw']=='1')?'no':'yes');
+		else $forcepw = '';
+		$moduser[] = 'dsmod user "cn='.$username.','.$ou.'" -upn '.$username.'@'.$domainname.' -display "'.upper($last).' '.$first.'" -disabled no -email "'.$email.'" -fn "'.$first.'" -ln "'.$last.'"'.$forcepw;
 		
 		//klogasse
 		//$mkuser[] = 'dsadd user "cn='.$first.' '.upper($last).','.$ou.'" -samid '.$username.' -hmdrv H: -hmdir "'.$homedir_unc.'" -upn '.$username.'@'.$post.' -fn "'.$first.'" -ln "'.$last.'" -email "'.$email.'" -display "'.$first.' '.upper($last).'" -pwd '.$password.' -mustchpwd yes -disabled no';
@@ -167,8 +171,8 @@ function controller()
 	$downloadbuttons.= $html->link('Download Klassenlisten.zip',$zipfilename);
 	*/
 
-	//return renderResults($hash);
-	return $html->goToLocation('?h='.$hash);
+	return renderResults($hash);
+	//return $html->goToLocation('?h='.$hash);
 }
 
 function renderResults($hash)
@@ -178,25 +182,31 @@ function renderResults($hash)
 		exit('Fehler');
 	$html = new HTML;
 
-	$downloadbuttons = $html->link('Download domaincontroller.txt','downloader.php?h='.$hash."&f=domaincontroller.txt").' ';
+	$zipfilename = 'tmp/'.$hash.'/Klassenlisten.zip';
+	$downloadbuttons = $html->link('Download domaincontroller.txt','tmp/'.$hash."/domaincontroller.txt").' ';
 	if(file_exists($basedir.DS.'emails_for_groups.ps1'))
-		$downloadbuttons.= $html->link('Download emails_for_groups.ps1','downloader.php?h='.$hash."&emails_for_groups.ps1").' ';
-	$downloadbuttons.= $html->link('Download fileserver.txt','downloader.php?h='.$hash."&fileserver.txt").' ';
+		$downloadbuttons.= $html->link('Download emails_for_groups.ps1','tmp/'.$hash."/emails_for_groups.ps1").' ';
+	$downloadbuttons.= $html->link('Download fileserver.txt','tmp/'.$hash."/fileserver.txt").' ';
 	$downloadbuttons.= $html->link('Download Klassenlisten.zip',$zipfilename);
+
+	
 
 	$table = json_decode(implode(NULL,file($basedir.DS.'table.json')),true);
 
-	return $downloadbuttons.
+	if(!$_GET['h'])
+		$permalink = '<br/><br/><div class="well"><strong>Permalink:</strong> <a href="?h='.$hash.'"><span id="domain"><script>window.onload = function() {$("#domain").text(window.location.href);}</script></span>?h='.$hash.'</a></div>';
+
+	return $downloadbuttons.$permalink.
 	'<h2> Empfohlene Vorgehensweise</h2>
 	<h4><strong>Schritt 1:</strong> Alle bestehenden Schülerkonten deaktivieren (im AD alle markieren -> rechte Maustaste-> Deaktivieren)</h4>
-	<h4><strong>Schritt 2:</strong> Auf dem Domaincontroller domaincontroller.txt mit einem Editor öffnen und in eine Eingabeaufforderung (cmd) eingeben (rechte maustaste->einfügen)</h4>
-	<h4><strong>Schritt 2.1 (wenn Gruppen angelegt werden sollen):</strong> Auf dem Domaincontroller das Script demails_for_groups.ps1 mit Powershell ausführen</h4>
+	<h4><strong>Schritt 2:</strong> Den Inhalt der domaincontroller.txt markieren und rechte Maustaste -> "Kopieren". Dann auf dem Domaincontroller eine Eingabeaufforderung (cmd) als Administrator aufmachen eingeben (rechte maustaste->einfügen) (nicht als .bat ausführen! Das wird Probleme mit Umlauten machen)</h4>
+	<h4><strong>Schritt 2.1 (wenn Gruppen angelegt werden sollen):</strong> Auf dem Domaincontroller das Script emails_for_groups.ps1 mit Powershell ausführen</h4>
 	<h4><strong>Schritt 3:</strong> Auf dem Dateiserver fileserver.txt mit einem Editor öffnen und in eine Eingabeaufforderung (cmd) eingeben</h4>
 	<h4><strong>Schritt 4:</strong> In der Datei Klassenlisten.zip sind für jede Klasse die Zugangsdaten aufbereitet. Die Listen sind excel-freundlich und können in dieser Form an alle Lehrer versendet werden. Mit dem Hinweis, dass die Passwörter nur neu angelegt Schüler betreffen!</h4>
 	<br/>
 	<h3>Zu beachten:</h3>
 	<ul>
-		<li>Bestehende Benutzerkonten werden NICHT mit dem neuen Passwort versehen</li>
+		<li>Bestehende Benutzerkonten werden NICHT mit dem neuen Passwort versehen außer es wurde explizit ausgewählt</li>
 		<li>Bestehende Klassenordner werden nicht geleert oder verschoben! Das sollte man am besten händisch vor dem Import machen</li>
 	</ul>
 	'.$html->table($table);
@@ -460,14 +470,8 @@ function saveFile($filename,$data,$append=false)
 		
 	$mode = ($append?'a':'w');
 
-	if($mode=='w' || !file_exists($filename))
-		$makeUTF8magic = true;
-	else $makeUTF8magic = false;
-	
 	$fp = fopen($filename,$mode);
-	if($makeUTF8magic)
-		fwrite($fp, pack("CCC",0xef,0xbb,0xbf)); 
-    fwrite($fp,$data."\r\n"); 
+    fwrite($fp,toISO($data)."\r\n"); 
     fclose($fp);
 }
 
