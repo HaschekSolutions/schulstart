@@ -156,9 +156,8 @@ function controller()
 	saveFile($dlpath."fileserver.txt",$homerights);
 	saveFile($dlpath."fileserver.txt",$classshare,true);
 
-	$fp = fopen($dlpath.'table.json','w');
-	fwrite($fp,json_encode($t));
-	fclose($fp);
+
+	file_put_contents($dlpath.'table.json', "\xEF\xBB\xBF". json_encode($t)); 
 	
 	/*
 	$downloadbuttons = $html->link('Download domaincontroller.txt',$dlpath."domaincontroller.txt").' ';
@@ -460,10 +459,16 @@ function saveFile($filename,$data,$append=false)
 		$data = implode("\r\n",$data);
 		
 	$mode = ($append?'a':'w');
+
+	if($mode=='w' || !file_exists($filename))
+		$makeUTF8magic = true;
+	else $makeUTF8magic = false;
 	
 	$fp = fopen($filename,$mode);
-	fwrite($fp,toISO($data)."\r\n");
-	fclose($fp);
+	if($makeUTF8magic)
+		fwrite($fp, pack("CCC",0xef,0xbb,0xbf)); 
+    fwrite($fp,$data."\r\n"); 
+    fclose($fp);
 }
 
 function mb_trim($string, $charlist='\\\\s', $ltrim=true, $rtrim=true) 
