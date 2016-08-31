@@ -156,9 +156,8 @@ function controller()
 	saveFile($dlpath."fileserver.txt",$homerights);
 	saveFile($dlpath."fileserver.txt",$classshare,true);
 
-	$fp = fopen($dlpath.'table.json','w');
-	fwrite($fp,json_encode($t));
-	fclose($fp);
+
+	file_put_contents($dlpath.'table.json', "\xEF\xBB\xBF". json_encode($t)); 
 	
 	/*
 	$downloadbuttons = $html->link('Download domaincontroller.txt',$dlpath."domaincontroller.txt").' ';
@@ -460,8 +459,13 @@ function saveFile($filename,$data,$append=false)
 		$data = implode("\r\n",$data);
 		
 	$mode = ($append?'a':'w');
-	
-	$fp = fopen($filename,$mode);
-	fwrite($fp,toISO($data)."\r\n");
-	fclose($fp);
+
+	if($mode=='w')
+		file_put_contents($filename, "\xEF\xBB\xBF". $data); 
+	else 
+	{
+		$fp = fopen($filename,$mode);
+		fwrite($fp,toISO($data)."\r\n");
+		fclose($fp);
+	}
 }
