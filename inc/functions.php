@@ -165,7 +165,7 @@ function controller()
 	saveFile($dlpath."fileserver.txt",$classshare,true);
 
 
-	file_put_contents($dlpath.'table.json', "\xEF\xBB\xBF". json_encode($t)); 
+	file_put_contents($dlpath.'table.json', (($_POST['encoding']!='1')?"\xEF\xBB\xBF":''). json_encode($t)); 
 	
 	/*
 	$downloadbuttons = $html->link('Download domaincontroller.txt',$dlpath."domaincontroller.txt").' ';
