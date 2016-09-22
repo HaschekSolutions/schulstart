@@ -74,6 +74,20 @@ function controller()
 		$homedir_unc = str_replace("*user*", $username, $_POST['uncpath']);
 		$localpath = str_replace("*user*", $username, $_POST['localpath']);
 		$post = $_POST['mailsuffix'];
+
+		switch($_POST['cnstyle'])
+		{
+			case '2':
+				$cn = $first.' '.mb_convert_case(lower($last), MB_CASE_UPPER, "UTF-8");
+			break;
+
+			case '3':
+				$cn = mb_convert_case(lower($last), MB_CASE_UPPER, "UTF-8").' '.$first;
+			break;
+
+			default:
+				$cn = $first.'.'.$last;
+		}
 		
 		
 		//arrays
@@ -91,12 +105,12 @@ function controller()
 			}
 		}
 		
-		$mkuser[] = 'dsadd user "cn='.$username.','.$ou.'" -samid '.$username.' -hmdrv H: -hmdir "'.$homedir_unc.'" -upn '.$username.'@'.$domainname.' -fn "'.$first.'" -ln "'.$last.'" -email "'.$email.'" -display "'.upper($last).' '.$first.'" -pwd '.$password.' -mustchpwd '.(($_POST['mustchangepw']==1)?'yes':'no').' -disabled no -canchpwd '.(($_POST['cantchangepw']=='1')?'no':'yes');
+		$mkuser[] = 'dsadd user "cn='.$cn.','.$ou.'" -samid '.$username.' -hmdrv H: -hmdir "'.$homedir_unc.'" -upn '.$username.'@'.$domainname.' -fn "'.$first.'" -ln "'.$last.'" -email "'.$email.'" -display "'.upper($last).' '.$first.'" -pwd '.$password.' -mustchpwd '.(($_POST['mustchangepw']==1)?'yes':'no').' -disabled no -canchpwd '.(($_POST['cantchangepw']=='1')?'no':'yes');
 		
 		if($_POST['forcepwallusers']=='1')
 			$forcepw = ' -pwd '.$password.' -mustchpwd '.(($_POST['mustchangepw']==1)?'yes':'no').' -canchpwd '.(($_POST['cantchangepw']=='1')?'no':'yes');
 		else $forcepw = '';
-		$moduser[] = 'dsmod user "cn='.$username.','.$ou.'" -upn '.$username.'@'.$domainname.' -display "'.upper($last).' '.$first.'" -disabled no -email "'.$email.'" -fn "'.$first.'" -ln "'.$last.'"'.$forcepw;
+		$moduser[] = 'dsmod user "cn='.$cn.','.$ou.'" -upn '.$username.'@'.$domainname.' -display "'.upper($last).' '.$first.'" -disabled no -email "'.$email.'" -fn "'.$first.'" -ln "'.$last.'"'.$forcepw;
 		
 		//klogasse
 		//$mkuser[] = 'dsadd user "cn='.$first.' '.upper($last).','.$ou.'" -samid '.$username.' -hmdrv H: -hmdir "'.$homedir_unc.'" -upn '.$username.'@'.$post.' -fn "'.$first.'" -ln "'.$last.'" -email "'.$email.'" -display "'.$first.' '.upper($last).'" -pwd '.$password.' -mustchpwd yes -disabled no';
