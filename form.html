@@ -18,7 +18,7 @@
         </div>
 
         <div class="checkbox">
-            <label><input type="checkbox" name="encoding" value="1">Ist die Datei in UTF8 kodiert?</label>
+            <label><input type="checkbox" name="encoding" value="1" checked>Ist die Datei in UTF8 kodiert?</label>
         </div>
         
           <div class="form-group">
@@ -72,9 +72,17 @@
           
           <div class="checkbox">
             <label>
-              <input type="checkbox" name="nodoublenames" value="1" checked> Soll bei Doppelnamen (nur Nachnamen) jedweils nur der erste Name verwendet werden (für kürzere Benutzernamen)?
+              <input type="checkbox" name="nodoublenames" value="1" checked> Soll bei Doppelnamen <strong>im Nachnamen</strong> jeweils nur der erste Name verwendet werden (für kürzere Benutzernamen)?
             </label>
-          </div><hr/>
+          </div>
+          
+          <div class="checkbox">
+            <label>
+              <input type="checkbox" name="nodoublenamesfirstname" value="1" checked> Soll bei Doppelnamen <strong>im Vornamen</strong> jeweils nur der erste Name verwendet werden (für kürzere Benutzernamen)?
+            </label>
+          </div>
+
+          <hr/>
           
           
           
@@ -142,9 +150,8 @@
               <input type="radio" name="emailstyle" id="inlineRadio3" value="6"> maurer@brg1.at (Nachname)
             </label>
         </div>
-      </div>
 
-      <h4>Wie soll der CN aussehen (wird so im AD angezeigt, hat nichts mit dem Login zutun)</h4>
+        <h4>Wie soll der CN aussehen bzw wie sieht er aktuell bei Benutzern im AD aus</h4>
           <div class="radio"> 
             <label class="">
               <input type="radio" name="cnstyle" id="inlineRadio1" value="1" checked> robert.maurer (vorname.nachname)
@@ -162,6 +169,15 @@
               <input type="radio" name="cnstyle" id="inlineRadio1" value="3"> MAURER Robert (NACHNAME vorname)
             </label>
           </div>
+
+          <div class="radio"> 
+            <label class="">
+              <input type="radio" name="cnstyle" id="inlineRadio1" value="4"> Gleich wie der Benutzername
+            </label>
+          </div>
+      </div>
+
+      
       
       
       <!-- Passwörter -->

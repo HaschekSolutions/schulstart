@@ -35,25 +35,25 @@ function controller()
 		switch($_POST['csv_aufbau'])
 		{
 			case 1:
-				$class = $a[2];
+				$class = mb_trim($a[2]);
 				$last= mb_trim(mb_convert_case(lower($a[1]), MB_CASE_TITLE, "UTF-8"));
 				$first = mb_trim(mb_convert_case(lower($a[0]), MB_CASE_TITLE, "UTF-8"));
 			break;
 
 			case 2:
-				$class = $a[2];
+				$class = mb_trim($a[2]);
 				$last= mb_trim(mb_convert_case(lower($a[0]), MB_CASE_TITLE, "UTF-8"));
 				$first = mb_trim(mb_convert_case(lower($a[1]), MB_CASE_TITLE, "UTF-8"));
 			break;
 
 			case 3:
-				$class = $a[0];
+				$class = mb_trim($a[0]);
 				$last= mb_trim(mb_convert_case(lower($a[1]), MB_CASE_TITLE, "UTF-8"));
 				$first = mb_trim(mb_convert_case(lower($a[2]), MB_CASE_TITLE, "UTF-8"));
 			break;
 
 			default:
-				$class = $a[0];
+				$class = mb_trim($a[0]);
 				$last= mb_trim(mb_convert_case(lower($a[2]), MB_CASE_TITLE, "UTF-8"));
 				$first = mb_trim(mb_convert_case(lower($a[1]), MB_CASE_TITLE, "UTF-8"));
 		}
@@ -85,8 +85,12 @@ function controller()
 				$cn = mb_convert_case(lower($last), MB_CASE_UPPER, "UTF-8").' '.$first;
 			break;
 
+			case '4':
+				$cn = $username;
+			break;
+
 			default:
-				$cn = $first.'.'.$last;
+				$cn = makeEmailSafe($first,true).'.'.makeEmailSafe($last,true);
 		}
 		
 		
@@ -333,7 +337,7 @@ function makeEmail($first,$last)
 	$first = lower($first);
 	$last = lower($last);
 	
-	$first = makeEmailSafe($first,true);
+	$first = makeEmailSafe($first,$_POST['nodoublenamesfirstname']);
 	$last = makeEmailSafe($last,$_POST['nodoublenames']);
 	
 	switch($_POST['emailstyle'])
@@ -389,17 +393,8 @@ function makeEmailSafe($text,$trim,$nohyphen=false)
 	if($nohyphen)
 		$text = str_replace ("-", "", $text);
 	//$text = preg_replace('~[^a-zA-Z0-9_-]*~i','',$text);
-	
-	$convert_to = array( 
-		"a", "a", "a", "a", "ae", "a", "ae", "c", "e", "e", "e", "e", "i", "i", "i", "i", 
-		"o", "n", "o", "o", "o", "o", "oe", "o", "u", "u", "u", "ue", "y", "", "", "", "c", "ss"
-	); 
-	$convert_from = array( 
-		"à", "á", "â", "ã", "ä", "å", "æ", "ç", "è", "é", "ê", "ë", "ì", "í", "î", "ï", 
-		"ð", "ñ", "ò", "ó", "ô", "õ", "ö", "ø", "ù", "ú", "û", "ü", "ý", "`", "´", "'", lower("Č"), "ß"
-	); 
 
-	$text = str_replace($convert_from, $convert_to, $text); 
+	$text = convertstrangeletters($text); 
 	
 	$text = preg_replace('@[^0-9a-zA-Z\.\-]+@i', '', $text);
 	
@@ -409,12 +404,12 @@ function makeEmailSafe($text,$trim,$nohyphen=false)
 function convertstrangeletters($text)
 {
 	$convert_to = array( 
-		"a", "a", "a", "a", "ae", "a", "ae", "c", "e", "e", "e", "e", "i", "i", "i", "i", 
-		"o", "n", "o", "o", "o", "o", "oe", "o", "u", "u", "u", "ue", "y", "", "", "", "c", "ss"
+		"a", "a", "a", "a", "ae", "a", "ae", "c", "c", "e", "e", "e", "e", "i", "i", "i", "i", 
+		"o", "n", "o", "o", "o", "o", "oe", "o", "u", "u", "u", "ue", "y", "", "", "", "c", "c", "ss"
 	); 
 	$convert_from = array( 
-		"à", "á", "â", "ã", "ä", "å", "æ", "ç", "è", "é", "ê", "ë", "ì", "í", "î", "ï", 
-		"ð", "ñ", "ò", "ó", "ô", "õ", "ö", "ø", "ù", "ú", "û", "ü", "ý", "`", "´", "'", lower("Č"), "ß"
+		"à", "á", "â", "ã", "ä", "å", "æ", "ç", "ć", "è", "é", "ê", "ë", "ì", "í", "î", "ï", 
+		"ð", "ñ", "ò", "ó", "ô", "õ", "ö", "ø", "ù", "ú", "û", "ü", "ý", "`", "´", "'", lower("Č"), "Č", "ß"
 	); 
 
 	return str_replace($convert_from, $convert_to, $text); 
@@ -424,11 +419,11 @@ function deepLower($texto){
     $texto = strtr($texto, " 
     ACELNÓSZZABCDEFGHIJKLMNOPRSTUWYZQ 
     XV
-    ÂÀÁÄÃÊÈÉËÎÍÌÏÔÕÒÓÖÛÙÚÜÇ 
+    ÂÀÁÄÃÊÈÉËÎÍÌÏÔÕÒÓÖÛÙÚÜÇČ 
     ", " 
     acelnószzabcdefghijklmnoprstuwyzq 
     xv
-    aaaäaeeeeiiiiooooöuuuüc 
+    aaaäaeeeeiiiiooooöuuuücc 
     "); 
     return lower($texto); 
 } 
