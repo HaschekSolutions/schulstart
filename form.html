@@ -151,7 +151,9 @@
             </label>
         </div>
 
-        <h4>Wie soll der CN aussehen bzw wie sieht er aktuell bei Benutzern im AD aus</h4>
+        <hr/>
+
+        <h4>Wie soll der CN (Common Name, der im Active Directory als Name angezeigt wird) aussehen?</h4>
           <div class="radio"> 
             <label class="">
               <input type="radio" name="cnstyle" id="inlineRadio1" value="1" checked> robert.maurer (vorname.nachname)
@@ -173,6 +175,12 @@
           <div class="radio"> 
             <label class="">
               <input type="radio" name="cnstyle" id="inlineRadio1" value="4"> Gleich wie der Benutzername
+            </label>
+          </div>
+
+          <div class="checkbox">
+            <label>
+              <input type="checkbox" name="renamecn" value="1" checked> Bestehende Benutzer umbenennen, sodass sie auf das neue Schema passen (empfohlen)
             </label>
           </div>
       </div>

@@ -92,7 +92,8 @@ function controller()
 			default:
 				$cn = makeEmailSafe($first,true).'.'.makeEmailSafe($last,true);
 		}
-		
+
+		$renamecn[] = 'rename-adobject -identity (get-aduser -filter {SamAccountName -eq "'.$username.'"}).distinguishedname -newname "'.$cn.'"';
 		
 		//arrays
 		$homerights[] = 'mkdir '.$localpath;
@@ -178,6 +179,9 @@ function controller()
 	
 	if($_POST['createclassgroups'])
 		saveFile($dlpath."emails_for_groups.ps1",$groupsPS);
+
+	if($_POST['renamecn'])
+		saveFile($dlpath."rename_old_cn.ps1",$renamecn);
 	
 	saveFile($dlpath."fileserver.txt",$homerights);
 	saveFile($dlpath."fileserver.txt",$classshare,true);
@@ -211,7 +215,8 @@ function renderResults($hash)
 	$downloadbuttons.= $html->link('Download fileserver.txt','tmp/'.$hash."/fileserver.txt").' ';
 	$downloadbuttons.= $html->link('Download Klassenlisten.zip',$zipfilename);
 
-	
+	if(file_exists($basedir.DS.'rename_old_cn.ps1'))
+		$downloadbuttons.= $html->link('Download prepare_users.ps1','tmp/'.$hash."/rename_old_cn.ps1").' ';
 
 	$table = json_decode(implode(NULL,file($basedir.DS.'table.json')),true);
 
