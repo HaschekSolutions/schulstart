@@ -3,6 +3,20 @@
 function controller()
 {
 	$html = new HTML;	
+
+	//if set, look for config file and store settings
+	$settingslike = $_REQUEST['sameas'];
+
+	if($settingslike && file_exists(ROOT.DS.'tmp'.DS.$settingslike.DS.'settings.json'))
+	{
+		$SETTINGS = json_decode(file_get_contents(ROOT.DS.'tmp'.DS.$settingslike.DS.'settings.json'),true);
+		$SETTINGS['ignorefirstline']=$_POST['ignorefirstline'];
+		$SETTINGS['encoding']=$_POST['encoding'];
+		$SETTINGS['csv_aufbau']=$_POST['csv_aufbau'];
+	}
+	else $SETTINGS = $_POST;
+
+	
 	
 	// save csv
 	$uploaddir = 'tmp/';
@@ -19,20 +33,20 @@ function controller()
 	$t[] = array('Klasse','Name','Username','Email','Passwort');
 	
 	$lines = file($uploadfile);
-	if($_POST['ignorefirstline']=='1')
+	if($SETTINGS['ignorefirstline']=='1')
 		unset($lines[0]);
 	foreach($lines as $line)
 	{
 		// file data
 		$line = str_replace("\0", "", $line);
-		if($_POST['encoding']=='1')
+		if($SETTINGS['encoding']=='1')
 			$line = toUTF8(($line));
 		else 
 			$line = toISO(($line));
-		$ic = $_POST['trennzeichen'];
+		$ic = $SETTINGS['trennzeichen'];
 		$a = explode($ic,$line);
 		
-		switch($_POST['csv_aufbau'])
+		switch($SETTINGS['csv_aufbau'])
 		{
 			case 1:
 				$class = mb_trim($a[2]);
@@ -52,6 +66,20 @@ function controller()
 				$first = mb_trim(mb_convert_case(lower($a[2]), MB_CASE_TITLE, "UTF-8"));
 			break;
 
+			case 4:
+				$class = mb_trim($a[0]);
+				$uuid = mb_trim($a[1]);
+				$last= mb_trim(mb_convert_case(lower($a[2]), MB_CASE_TITLE, "UTF-8"));
+				$first = mb_trim(mb_convert_case(lower($a[3]), MB_CASE_TITLE, "UTF-8"));
+			break;
+
+			case 5:
+				$class = mb_trim($a[0]);
+				$uuid = mb_trim($a[3]);
+				$last= mb_trim(mb_convert_case(lower($a[1]), MB_CASE_TITLE, "UTF-8"));
+				$first = mb_trim(mb_convert_case(lower($a[2]), MB_CASE_TITLE, "UTF-8"));
+			break;
+
 			default:
 				$class = mb_trim($a[0]);
 				$last= mb_trim(mb_convert_case(lower($a[2]), MB_CASE_TITLE, "UTF-8"));
@@ -67,15 +95,15 @@ function controller()
 		
 		
 		// form data
-		$ou = utf8_decode($_POST['ou']);
-		$createhomes = $_POST['homes'];
-		$creategroups = $_POST['groups'];
-		$domainname = $_POST['domainname'];
-		$homedir_unc = str_replace("*user*", $username, $_POST['uncpath']);
-		$localpath = str_replace("*user*", $username, $_POST['localpath']);
-		$post = $_POST['mailsuffix'];
+		$ou = utf8_decode($SETTINGS['ou']);
+		$createhomes = $SETTINGS['homes'];
+		$creategroups = $SETTINGS['groups'];
+		$domainname = $SETTINGS['domainname'];
+		$homedir_unc = str_replace("*user*", $username, $SETTINGS['uncpath']);
+		$localpath = str_replace("*user*", $username, $SETTINGS['localpath']);
+		$post = $SETTINGS['mailsuffix'];
 
-		switch($_POST['cnstyle'])
+		switch($SETTINGS['cnstyle'])
 		{
 			case '2':
 				$cn = $first.' '.mb_convert_case(lower($last), MB_CASE_UPPER, "UTF-8");
@@ -100,9 +128,9 @@ function controller()
 		$homerights[] = 'echo J|cacls '.$localpath.' /G '.$username.utf8_decode(':f Domänen-Admins:f /T');
 		
 		
-		if($_POST['adduserstogroup'] && $class)
+		if($SETTINGS['adduserstogroup'] && $class)
 		{
-			$addtogroups = explode(',',$_POST['adduserstogroup']);
+			$addtogroups = explode(',',$SETTINGS['adduserstogroup']);
 			foreach($addtogroups as $grp)
 			{
 				$grp = trim($grp);
@@ -110,12 +138,12 @@ function controller()
 			}
 		}
 		
-		$mkuser[] = 'dsadd user "cn='.$cn.','.$ou.'" -samid '.$username.' -hmdrv H: -hmdir "'.$homedir_unc.'" -upn '.$username.'@'.$domainname.' -fn "'.$first.'" -ln "'.$last.'" -email "'.$email.'" -display "'.upper($last).' '.$first.'" -pwd '.$password.' -mustchpwd '.(($_POST['mustchangepw']==1)?'yes':'no').' -disabled no -canchpwd '.(($_POST['cantchangepw']=='1')?'no':'yes');
+		$mkuser[] = 'dsadd user "cn='.$cn.','.$ou.'" -samid '.$username.' -hmdrv H: -hmdir "'.$homedir_unc.'" -upn '.$username.'@'.$domainname.' -fn "'.$first.'" -ln "'.$last.'" -email "'.$email.'" -display "'.upper($last).' '.$first.'" -pwd '.$password.' -mustchpwd '.(($SETTINGS['mustchangepw']==1)?'yes':'no').' -disabled no -canchpwd '.(($SETTINGS['cantchangepw']=='1')?'no':'yes').($uuid?' -empid '.$uuid:'');
 		
-		if($_POST['forcepwallusers']=='1')
-			$forcepw = ' -pwd '.$password.' -mustchpwd '.(($_POST['mustchangepw']==1)?'yes':'no').' -canchpwd '.(($_POST['cantchangepw']=='1')?'no':'yes');
+		if($SETTINGS['forcepwallusers']=='1')
+			$forcepw = ' -pwd '.$password.' -mustchpwd '.(($SETTINGS['mustchangepw']==1)?'yes':'no').' -canchpwd '.(($SETTINGS['cantchangepw']=='1')?'no':'yes');
 		else $forcepw = '';
-		$moduser[] = 'dsmod user "cn='.$cn.','.$ou.'" -upn '.$username.'@'.$domainname.' -display "'.upper($last).' '.$first.'" -disabled no -email "'.$email.'" -fn "'.$first.'" -ln "'.$last.'"'.$forcepw;
+		$moduser[] = 'dsmod user "cn='.$cn.','.$ou.'" -upn '.$username.'@'.$domainname.' -display "'.upper($last).' '.$first.'" -disabled no -email "'.$email.'" -fn "'.$first.'" -ln "'.$last.'"'.$forcepw.($uuid?' -empid '.$uuid:'');
 		
 		//klogasse
 		//$mkuser[] = 'dsadd user "cn='.$first.' '.upper($last).','.$ou.'" -samid '.$username.' -hmdrv H: -hmdir "'.$homedir_unc.'" -upn '.$username.'@'.$post.' -fn "'.$first.'" -ln "'.$last.'" -email "'.$email.'" -display "'.$first.' '.upper($last).'" -pwd '.$password.' -mustchpwd yes -disabled no';
@@ -129,7 +157,7 @@ function controller()
 	}
 	
 	
-	if($creategroups && $_POST['createclassgroups'] && is_array($classes))
+	if($creategroups && $SETTINGS['createclassgroups'] && is_array($classes))
 	{
 		$zip = new ZipArchive();
 		$zipfilename = $dlpath."Klassenlisten.zip";
@@ -140,18 +168,18 @@ function controller()
 		
 		foreach($classes as $class=>$users)
 		{
-			if($_POST['deletegroups'])
+			if($SETTINGS['deletegroups'])
 				$groups[] = 'net group '.$class.' /delete';
 			
 			$groups[] = 'net group '.$class.' /add /domain';
 			$groupsPS[] = 'Set-ADGroup "'.$class.'" -Replace @{mail="'.$class.'@'.$post.'"}';
 			
-			if($_POST['addshare'] && $_POST['classsharepath'])
+			if($SETTINGS['addshare'] && $SETTINGS['classsharepath'])
 			{
-				$path = str_replace("*klasse*", $class, $_POST['classsharepath']);
+				$path = str_replace("*klasse*", $class, $SETTINGS['classsharepath']);
 				$classshare[] = 'mkdir '.$path;
-				if($_POST['grouppermission'])
-					$alsoallowed = $_POST['grouppermission'].':f';
+				if($SETTINGS['grouppermission'])
+					$alsoallowed = $SETTINGS['grouppermission'].':f';
 				$classshare[] = 'echo J|cacls '.$path.' /G '.$class.':f '.$alsoallowed.utf8_decode(' Domänen-Admins:f');
 			}
 			
@@ -170,6 +198,9 @@ function controller()
 		
 		$zip->close();
 	}
+
+	if(!$settingslike)
+		file_put_contents(ROOT.DS.'tmp'.DS.$hash.DS.'settings.json',json_encode($SETTINGS));
 	
 	saveFile($dlpath."domaincontroller.txt",$mkuser);
 	saveFile($dlpath."domaincontroller.txt",$moduser,true);
@@ -177,17 +208,17 @@ function controller()
 	saveFile($dlpath."domaincontroller.txt",$groups,true);
 	saveFile($dlpath."domaincontroller.txt",$usergroups,true);
 	
-	if($_POST['createclassgroups'])
+	if($SETTINGS['createclassgroups'])
 		saveFile($dlpath."emails_for_groups.ps1",$groupsPS);
 
-	if($_POST['renamecn'])
+	if($SETTINGS['renamecn'])
 		saveFile($dlpath."rename_old_cn.ps1",$renamecn);
 	
 	saveFile($dlpath."fileserver.txt",$homerights);
 	saveFile($dlpath."fileserver.txt",$classshare,true);
 
 
-	file_put_contents($dlpath.'table.json', (($_POST['encoding']!='1')?"\xEF\xBB\xBF":''). json_encode($t)); 
+	file_put_contents($dlpath.'table.json', (($SETTINGS['encoding']!='1')?"\xEF\xBB\xBF":''). json_encode($t)); 
 	
 	/*
 	$downloadbuttons = $html->link('Download domaincontroller.txt',$dlpath."domaincontroller.txt").' ';

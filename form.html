@@ -13,6 +13,11 @@
         </div>
         <br/>
 
+        <div class="form-group">
+          <label for="sameas">Wenn Sie die Einstellungen vorhergehender Uploads verwenden wollen, geben Sie hier die ID des alten Uploads ein</label>
+          <input type="text" class="form-control" name="sameas" id="sameas">
+        </div>
+
         <div class="checkbox">
             <label><input type="checkbox" name="ignorefirstline" value="1" checked>Soll die erste Zeile ignoriert werden?</label>
         </div>
@@ -28,6 +33,8 @@
                   <option value="1">VORNAME;NACHNAME;KLASSE</option>
                   <option value="2">NACHNAME;VORNAME;KLASSE</option>
                   <option value="3">KLASSE;NACHNAME;VORNAME</option>
+                  <option selected value="4">KLASSE;Schülerkennzahl;NACHNAME;VORNAME</option>
+                  <option value="5">KLASSE;NACHNAME;VORNAME;Schülerkennzahl</option>
             </select>
           </div>
 
