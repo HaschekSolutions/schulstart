@@ -13,6 +13,9 @@ function controller()
 		$SETTINGS['ignorefirstline']=$_POST['ignorefirstline'];
 		$SETTINGS['encoding']=$_POST['encoding'];
 		$SETTINGS['csv_aufbau']=$_POST['csv_aufbau'];
+		$SETTINGS['trennzeichen']=$_POST['trennzeichen'];
+
+		$_POST=$SETTINGS;
 	}
 	else $SETTINGS = $_POST;
 
