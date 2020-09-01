@@ -125,7 +125,7 @@ function controller()
 		}
 
 		if($uuid)
-			$renamecn[] = 'rename-adobject -identity (get-aduser -filter {empid -eq "'.$uuid.'"}).distinguishedname -newname "'.$cn.'"';
+			$renamecn[] = 'rename-adobject -identity (get-aduser -filter {employeeID -eq "'.$uuid.'"}).distinguishedname -newname "'.$cn.'"';
 		else
 			$renamecn[] = 'rename-adobject -identity (get-aduser -filter {SamAccountName -eq "'.$username.'"}).distinguishedname -newname "'.$cn.'"';
 		
