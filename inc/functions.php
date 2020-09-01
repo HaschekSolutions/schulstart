@@ -124,7 +124,10 @@ function controller()
 				$cn = makeEmailSafe($first,true).'.'.makeEmailSafe($last,true);
 		}
 
-		$renamecn[] = 'rename-adobject -identity (get-aduser -filter {SamAccountName -eq "'.$username.'"}).distinguishedname -newname "'.$cn.'"';
+		if($uuid)
+			$renamecn[] = 'rename-adobject -identity (get-aduser -filter {empid -eq "'.$uuid.'"}).distinguishedname -newname "'.$cn.'"';
+		else
+			$renamecn[] = 'rename-adobject -identity (get-aduser -filter {SamAccountName -eq "'.$username.'"}).distinguishedname -newname "'.$cn.'"';
 		
 		//arrays
 		$homerights[] = 'mkdir '.$localpath;
@@ -166,7 +169,7 @@ function controller()
 		$zipfilename = $dlpath."Klassenlisten.zip";
 		
 		if ($zip->open($zipfilename, ZIPARCHIVE::CREATE | ZipArchive::OVERWRITE)!==TRUE) {
-			exit("cannot open $filename");
+			exit("cannot open $zipfilename");
 		}
 		
 		foreach($classes as $class=>$users)
