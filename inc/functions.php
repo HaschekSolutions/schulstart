@@ -205,8 +205,7 @@ function controller()
 		$zip->close();
 	}
 
-	if(!$settingslike)
-		file_put_contents(ROOT.DS.'tmp'.DS.$hash.DS.'settings.json',json_encode($SETTINGS));
+	file_put_contents(ROOT.DS.'tmp'.DS.$hash.DS.'settings.json',json_encode($SETTINGS));
 	
 	saveFile($dlpath."domaincontroller.txt",$mkuser);
 	saveFile($dlpath."domaincontroller.txt",$moduser,true);
