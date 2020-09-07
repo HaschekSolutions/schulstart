@@ -353,14 +353,16 @@ function makeUsername($first,$last)
 	{
 		$first = preg_replace('/[^\p{Latin}\d ]/u', '', $first);
 		$last = preg_replace('/[^\p{Latin}\d ]/u', '', $last);
+
+		$first = str_replace (" ", "", $first);
+		$first = str_replace ("-", "", $first);
+		
+		$last = str_replace (" ", "", $last);
+		$last = str_replace ("-", "", $last);
 	}
 	
 	//var_dump(mb_substr($last,0,4,'utf-8'));
-	$first = str_replace (" ", "", $first);
-	$first = str_replace ("-", "", $first);
 	
-	$last = str_replace (" ", "", $last);
-	$last = str_replace ("-", "", $last);
 	
 	switch($_POST['usernamestyle'])
 	{
@@ -372,6 +374,20 @@ function makeUsername($first,$last)
 		case 5: return mb_substr($last,0,4,'utf-8').mb_substr($first,0,4,'utf-8');
 		case 6: return $last;
 	}
+}
+
+function getPartialNames()
+{
+	return array(
+		'al',
+		'el',
+		'del',
+		'van',
+		'van den',
+		'van der',
+		'von',
+		'de'
+	);
 }
 
 function makeEmail($first,$last)
@@ -413,24 +429,35 @@ function generatePasswordAlpha($length)
 }
 
 
-function makeEmailSafe($text,$trim,$nohyphen=false)
+function makeEmailSafe($text,$trim=false,$nohyphen=false)
 {
+	$text = str_replace ("--", "-", $text);
+
 	if($trim)
 	{
-		$pos = mb_strpos($text," ");
-		if($pos) $text = mb_substr($text,0,$pos,'utf-8');
-			
-		$pos = mb_strpos($text,"-");
-		if($pos)
-			$text = mb_substr($text,0,$pos,'utf-8');
+		$partnames = getPartialNames();
+		$testparts = str_replace('-',' ',$text);
+		$parts = explode(' ',$testparts);
+		$newtext = array();
+		foreach($parts as $p)
+		{
+			if(in_array(strtolower($p),$partnames))
+				$newtext[] = $p;
+			else 
+			{
+				$newtext[] = $p;
+				break;
+			}
+		}
+		
+		$text = implode('-',$newtext);
 	}
 	$text = trim($text);
 	$text = lower($text);
 	
-	//$text = str_replace ("-", "", $text);
 	$text = str_replace (" ", "-", $text);
 	
-	$text = str_replace ("--", "-", $text);
+	
 	
 	if($nohyphen)
 		$text = str_replace ("-", "", $text);
