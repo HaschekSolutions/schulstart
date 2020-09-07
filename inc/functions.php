@@ -42,10 +42,11 @@ function controller()
 	{
 		// file data
 		$line = str_replace("\0", "", $line);
-		if($SETTINGS['encoding']=='1')
+		/*if($SETTINGS['encoding']=='1')
 			$line = toUTF8(($line));
 		else 
 			$line = toISO(($line));
+			*/
 		$ic = $SETTINGS['trennzeichen'];
 		$a = explode($ic,$line);
 		
@@ -333,7 +334,7 @@ function makePassword($last,$email)
 		default:
 		case 1: return generatePasswordAlphanum(8,$email);
 		case 2: return generatePasswordAlpha(8);
-		case 3: return makeEmailSafe(lower($last));
+		case 3: return makeEmailSafe(lower($last),false);
 		case 4: return $_POST['custompassword'];
 	}
 }
@@ -542,7 +543,7 @@ function saveFile($filename,$data,$append=false)
 	$fp = fopen(trim($filename),$mode);
 	if($fp)
 	{
-		fwrite($fp,toISO($data)."\r\n"); 
+		fwrite($fp,($data)."\r\n"); 
 		fclose($fp);
 	}
 	else die('error opening '.$filename);
