@@ -137,7 +137,7 @@ function controller()
 		
 		//arrays
 		$homerights[] = 'mkdir '.$localpath;
-		$homerights[] = 'echo J|cacls '.$localpath.' /G '.$username.utf8_decode(':f Domänen-Admins:f /T');
+		$homerights[] = 'echo J|cacls '.$localpath.' /G '.$username.':f Domänen-Admins:f /T';
 		
 		
 		if($SETTINGS['adduserstogroup'] && $class)
@@ -192,7 +192,7 @@ function controller()
 				$classshare[] = 'mkdir '.$path;
 				if($SETTINGS['grouppermission'])
 					$alsoallowed = $SETTINGS['grouppermission'].':f';
-				$classshare[] = 'echo J|cacls '.$path.' /G '.$class.':f '.$alsoallowed.utf8_decode(' Domänen-Admins:f');
+				$classshare[] = 'echo J|cacls '.$path.' /G '.$class.':f '.$alsoallowed.' Domänen-Admins:f';
 			}
 			
 			$classcsv = array();
