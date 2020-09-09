@@ -127,8 +127,8 @@ function controller()
 
 		if($uuid)
 		{
-			//$renamecn[] = '$oldhome = (get-aduser -Properties * -filter {employeeID -eq "'.$uuid.'"}).homedirectory';
-			//$renamecn[] = 'Rename-Item -Path $oldhome '.$username;
+			$renamehome[] = '$oldhome = (get-aduser -Properties * -filter {employeeID -eq "'.$uuid.'"}).homedirectory';
+			$renamehome[] = 'Rename-Item -Path $oldhome '.$username;
 			$renamecn[] = 'rename-adobject -identity (get-aduser -filter {employeeID -eq "'.$uuid.'"}).distinguishedname -newname "'.$cn.'"';
 			$renamecn[] = 'Set-ADUser "cn='.$cn.','.$ou.'" -Replace @{samaccountname="'.$username.'"} ';
 		}
@@ -225,6 +225,8 @@ function controller()
 	if($SETTINGS['renamecn'])
 		saveFile($dlpath."rename_old_cn.ps1",$renamecn);
 	
+	saveFile($dlpath."rename_homes.ps1",$renamehome);
+	
 	saveFile($dlpath."fileserver.txt",$homerights);
 	saveFile($dlpath."fileserver.txt",$classshare,true);
 
@@ -253,6 +255,8 @@ function renderResults($hash)
 	$zipfilename = 'tmp/'.$hash.'/Klassenlisten.zip';
 	if(file_exists($basedir.DS.'rename_old_cn.ps1'))
 		$downloadbuttons.= $html->link('Download prepare_users.ps1','tmp/'.$hash."/rename_old_cn.ps1").' ';
+	if(file_exists($basedir.DS.'rename_homes.ps1'))
+		$downloadbuttons.= $html->link('Download rename_homes.ps1','tmp/'.$hash."/rename_homes.ps1").' ';
 	$downloadbuttons.= $html->link('Download domaincontroller.txt','tmp/'.$hash."/domaincontroller.txt").' ';
 	if(file_exists($basedir.DS.'emails_for_groups.ps1'))
 		$downloadbuttons.= $html->link('Download emails_for_groups.ps1','tmp/'.$hash."/emails_for_groups.ps1").' ';
