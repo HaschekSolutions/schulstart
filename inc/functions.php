@@ -130,6 +130,7 @@ function controller()
 			$renamecn[] = '$oldhome = (get-aduser -Properties * -filter {employeeID -eq "'.$uuid.'"}).homedirectory';
 			$renamecn[] = 'Rename-Item -Path $oldhome '.$username;
 			$renamecn[] = 'rename-adobject -identity (get-aduser -filter {employeeID -eq "'.$uuid.'"}).distinguishedname -newname "'.$cn.'"';
+			$renamecn[] = 'Set-ADUser "'.$cn.'" -Replace @{samaccountname="'.$username.'"} ';
 		}
 		else
 			$renamecn[] = 'rename-adobject -identity (get-aduser -filter {SamAccountName -eq "'.$username.'"}).distinguishedname -newname "'.$cn.'"';
