@@ -451,14 +451,11 @@ function makeEmailSafe($text,$trim=false,$nohyphen=false)
 		foreach($parts as $key => $p)
 		{
             if(in_array(strtolower($p),$partnames) )
-            {
                 $newtext[] = $p;
-                
-            }
 			else 
 			{
                 $newtext[] = $p;
-                if(( $parts[($key+1)] && in_array(strtolower($p.' '.$parts[($key+1)]),$partnames)))
+                if(( $parts[($key+1)] && in_array(strtolower($parts[($key-1)].' '.$p),$partnames)))
                     $newtext[] = $parts[($key+1)];
 				break;
 			}
