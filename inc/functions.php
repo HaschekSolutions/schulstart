@@ -448,13 +448,18 @@ function makeEmailSafe($text,$trim=false,$nohyphen=false)
 		$testparts = str_replace('-',' ',$text);
 		$parts = explode(' ',$testparts);
 		$newtext = array();
-		foreach($parts as $p)
+		foreach($parts as $key => $p)
 		{
-			if(in_array(strtolower($p),$partnames))
-				$newtext[] = $p;
+            if(in_array(strtolower($p),$partnames) )
+            {
+                $newtext[] = $p;
+                
+            }
 			else 
 			{
-				$newtext[] = $p;
+                $newtext[] = $p;
+                if(( $parts[($key+1)] && in_array(strtolower($p.' '.$parts[($key+1)]),$partnames)))
+                    $newtext[] = $parts[($key+1)];
 				break;
 			}
 		}
@@ -483,11 +488,11 @@ function convertstrangeletters($text)
 {
 	$convert_to = array( 
 		"a", "a", "a", "a", "ae", "a", "ae", "c", "c", "e", "e", "e", "e", "i", "i", "i", "i", 
-		"o", "n", "o", "o", "o", "o", "oe", "o", "u", "u", "u", "ue", "y", "", "", "", "c", "c", "ss"
+		"o", "n", "o", "o", "o", "o", "oe", "o", "u", "u", "u", "ue", "y", "", "", "", "c", "c", "ss","s","z"
 	); 
 	$convert_from = array( 
 		"à", "á", "â", "ã", "ä", "å", "æ", "ç", "ć", "è", "é", "ê", "ë", "ì", "í", "î", "ï", 
-		"ð", "ñ", "ò", "ó", "ô", "õ", "ö", "ø", "ù", "ú", "û", "ü", "ý", "`", "´", "'", lower("Č"), "Č", "ß"
+		"ð", "ñ", "ò", "ó", "ô", "õ", "ö", "ø", "ù", "ú", "û", "ü", "ý", "`", "´", "'", "č", "Č", "ß","š","ž"
 	); 
 
 	return str_replace($convert_from, $convert_to, $text); 
