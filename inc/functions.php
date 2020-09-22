@@ -19,7 +19,8 @@ function controller()
 	}
 	else $SETTINGS = $_POST;
 
-	
+	//array to check for double users
+	$allusernames = array();
 	
 	// save csv
 	$uploaddir = 'tmp/';
@@ -96,6 +97,41 @@ function controller()
 		$username = mb_substr(makeUsername($first,$last),0,20,'utf-8');
 		$email = makeEmail($first,$last);
 		$password = makePassword($last,$email);
+
+
+		//check for double username
+		if($allusernames[$username])
+		{
+			//ok so we have 2 users with the same name
+			//try allowing of forbidding doublenames
+			$origlast = $_POST['nodoublenames'];
+			$origfirst = $_POST['nodoublenamesfirstname'];
+
+			if($_POST['nodoublenames']) $_POST['nodoublenames'] = false;
+			else $_POST['nodoublenames'] = true;
+
+			if($_POST['nodoublenamesfirstname']) $_POST['nodoublenamesfirstname'] = false;
+			else $_POST['nodoublenamesfirstname'] = true;
+
+			$username = mb_substr(makeUsername($first,$last),0,20,'utf-8');
+			$email = makeEmail($first,$last);
+
+			if($allusernames[$username])
+			{
+				//hmm that didn't work. let's give them a number
+				$username = mb_substr(makeUsername($first,$last).'1',0,20,'utf-8');
+				$email = makeEmail($first,$last);
+				if($allusernames[$username])
+					exit("Cant fix the double name on $first $last. It's in the list twice");
+			}
+
+			//ok name change seems to have worked. let's reset the original rule and continue
+			$_POST['nodoublenames'] = $origlast;
+			$_POST['nodoublenamesfirstname'] = $origfirst;
+
+		}
+		else
+			$allusernames[$username] = true;
 		
 		
 		// form data
