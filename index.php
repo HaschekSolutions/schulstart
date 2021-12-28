@@ -4,7 +4,7 @@
   define('DS', DIRECTORY_SEPARATOR);
   define('ROOT', dirname(__FILE__));
 
-  error_reporting(E_ALL & ~E_NOTICE);
+  error_reporting(E_ALL & ~E_DEPRECATED & ~E_STRICT & ~E_NOTICE);
   ini_set('display_errors','On');
   
   include_once('inc/Encoding.php');
