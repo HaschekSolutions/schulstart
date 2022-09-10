@@ -186,12 +186,17 @@ function controller()
 			}
 		}
 		
-		$mkuser[] = 'dsadd user "cn='.$cn.','.$ou.'" -samid '.$username.' -hmdrv H: -hmdir "'.$homedir_unc.'" -upn '.$username.'@'.$domainname.' -fn "'.$first.'" -ln "'.$last.'" -email "'.$email.'" -display "'.upper($last).' '.$first.'" -pwd '.$password.' -mustchpwd '.(($SETTINGS['mustchangepw']==1)?'yes':'no').' -disabled no -canchpwd '.(($SETTINGS['cantchangepw']=='1')?'no':'yes').($uuid?' -empid '.$uuid:'');
+		$mkuser[] = 'dsadd user "cn='.$cn.','.$ou.'" -samid '.$username.' -hmdrv H: -hmdir "'.$homedir_unc.'" -upn '.$email.' -fn "'.$first.'" -ln "'.$last.'" -email "'.$email.'" -display "'.upper($last).' '.$first.'" -pwd '.$password.' -mustchpwd '.(($SETTINGS['mustchangepw']==1)?'yes':'no').' -disabled no -canchpwd '.(($SETTINGS['cantchangepw']=='1')?'no':'yes').($uuid?' -empid '.$uuid:'');
 		
 		if($SETTINGS['forcepwallusers']=='1')
 			$forcepw = ' -pwd '.$password.' -mustchpwd '.(($SETTINGS['mustchangepw']==1)?'yes':'no').' -canchpwd '.(($SETTINGS['cantchangepw']=='1')?'no':'yes');
 		else $forcepw = '';
-		$moduser[] = 'dsmod user "cn='.$cn.','.$ou.'" -upn '.$username.'@'.$domainname.' -display "'.upper($last).' '.$first.'" -disabled no -email "'.$email.'" -fn "'.$first.'" -ln "'.$last.'"'.$forcepw.($uuid?' -empid '.$uuid:'');
+		
+		if($uuid)
+			$dsmod  = 'get-aduser -filter {employeeID -eq "'.$uuid.'"} | dsmod user';
+		else
+			$dsmod = 'dsmod user "cn='.$cn.','.$ou.'"';
+		$moduser[] = $dsmod.' -upn '.$email.' -display "'.upper($last).' '.$first.'" -disabled no -email "'.$email.'" -fn "'.$first.'" -ln "'.$last.'"'.$forcepw.($uuid?' -empid '.$uuid:'');
 		
 		//klogasse
 		//$mkuser[] = 'dsadd user "cn='.$first.' '.upper($last).','.$ou.'" -samid '.$username.' -hmdrv H: -hmdir "'.$homedir_unc.'" -upn '.$username.'@'.$post.' -fn "'.$first.'" -ln "'.$last.'" -email "'.$email.'" -display "'.$first.' '.upper($last).'" -pwd '.$password.' -mustchpwd yes -disabled no';
