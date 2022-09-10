@@ -193,7 +193,7 @@ function controller()
 		else $forcepw = '';
 		
 		if($uuid)
-			$dsmod  = 'get-aduser -filter {employeeID -eq "'.$uuid.'"} | dsmod user';
+			$dsmod  = '$dsuser = dsquery * -filter "(employeeID='.$uuid.')" ; dsmod user $dsuser';
 		else
 			$dsmod = 'dsmod user "cn='.$cn.','.$ou.'"';
 		$moduser[] = $dsmod.' -upn '.$email.' -display "'.upper($last).' '.$first.'" -disabled no -email "'.$email.'" -fn "'.$first.'" -ln "'.$last.'"'.$forcepw.($uuid?' -empid '.$uuid:'');
