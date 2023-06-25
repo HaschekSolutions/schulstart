@@ -33,8 +33,11 @@ function controller()
 	$dlpath ='tmp/'.$hash.'/';
 	if(!is_dir($dlpath)) 
 		mkdir($dlpath);
-	
+	copy($uploadfile,$dlpath.$hash.'.csv');
+
 	$t[] = array('Klasse','Name','Username','Email','Passwort');
+	$usercheck[] = '$newusers = 0';
+	$usercheck[] = '$existingusers = 0';
 	
 	$lines = file($uploadfile);
 	if($SETTINGS['ignorefirstline']=='1')
@@ -167,9 +170,29 @@ function controller()
 			$renamehome[] = 'Rename-Item -Path $oldhome '.$username;
 			$renamecn[] = 'rename-adobject -identity (get-aduser -filter {employeeID -eq "'.$uuid.'"}).distinguishedname -newname "'.$cn.'"';
 			$renamecn[] = 'Set-ADUser "cn='.$cn.','.$ou.'" -Replace @{samaccountname="'.$username.'"} ';
+			//$usercheck[] = 'rename-adobject -identity (get-aduser -filter {employeeID -eq "'.$uuid.'"}).distinguishedname -newname "'.$cn.'"';
+			//$usercheck[] = 'Set-ADUser "cn='.$cn.','.$ou.'" -Replace @{samaccountname="'.$username.'"} ';
 		}
 		else
 			$renamecn[] = 'rename-adobject -identity (get-aduser -filter {SamAccountName -eq "'.$username.'"}).distinguishedname -newname "'.$cn.'"';
+
+		$usercheck[] = '$dsuser = dsquery * -filter "(employeeID='.$uuid.')" ;
+		if (!$dsuser) {
+			$bysamid = dsquery * -filter "(samaccountname='.$username.')"
+			if(!$bysamid)
+			{
+				echo "Neuer User: '.$username.' ('.$last.' '.$first.')";
+				$newusers++;
+			}
+			else
+			{
+				echo "Bestehender Benutzer per Usernamen gefunden: '.$username.' ('.$last.' '.$first.')";
+				$existingusers++;
+			}
+		}
+		else {
+			$existingusers++;
+		}';
 		
 		//arrays
 		$homerights[] = 'mkdir '.$localpath;
@@ -194,16 +217,26 @@ function controller()
 			$forcepw = ' -pwd '.$password.' -mustchpwd '.(($SETTINGS['mustchangepw']==1)?'yes':'no').' -canchpwd '.(($SETTINGS['cantchangepw']=='1')?'no':'yes');
 		else $forcepw = '';
 		
-		if($uuid)
-			$dsmod  = '$dsuser = dsquery * -filter "(employeeID='.$uuid.')" ; dsmod user $dsuser';
-		else
-			$dsmod = 'dsmod user "cn='.$cn.','.$ou.'"';
-		$moduser[] = $dsmod.' -upn '.$email.' -display "'.upper($last).' '.$first.'" -disabled no -email "'.$email.'" -fn "'.$first.'" -ln "'.$last.'"'.$forcepw.($uuid?' -empid '.$uuid:'');
+		// if($uuid)
+		// 	$dsmod  = '$dsuser = dsquery * -filter "(employeeID='.$uuid.')" ; dsmod user $dsuser';
+		// else
+		// 	$dsmod = 'dsmod user "cn='.$cn.','.$ou.'"';
+		// $moduser[] = $dsmod.' -upn '.$email.' -display "'.upper($last).' '.$first.'" -disabled no -email "'.$email.'" -fn "'.$first.'" -ln "'.$last.'"'.$forcepw.($uuid?' -empid '.$uuid:'');
 		
 		//klogasse
 		//$mkuser[] = 'dsadd user "cn='.$first.' '.upper($last).','.$ou.'" -samid '.$username.' -hmdrv H: -hmdir "'.$homedir_unc.'" -upn '.$username.'@'.$post.' -fn "'.$first.'" -ln "'.$last.'" -email "'.$email.'" -display "'.$first.' '.upper($last).'" -pwd '.$password.' -mustchpwd yes -disabled no';
 		//$moduser[] = 'dsmod user "cn='.$username.','.$ou.'" -display "'.$first.' '.upper($last).'" -disabled no -email "'.$email.'" -fn "'.$first.'" -ln "'.$last.'"';
 		//$moduser[] = 'dsmod user "cn='.$first.' '.upper($last).','.$ou.'" -display "'.$first.' '.upper($last).'" -disabled no -email "'.$email.'" -fn "'.$first.'" -ln "'.$last.'"';
+
+		//base command
+		$dsmod = ' -upn '.$email.' -display "'.upper($last).' '.$first.'" -disabled no -email "'.$email.'" -fn "'.$first.'" -ln "'.$last.'"'.$forcepw.($uuid?' -empid '.$uuid:'');
+
+		// without uuid take the CN
+		$dsmod_cn = 'dsmod user "cn='.$cn.','.$ou.'"'.$dsmod;
+		// else use uuid
+		$dsmod_uuid  =  '$dsuser = dsquery * -filter "(employeeID='.$uuid.')" ; if (!$dsuser){ '.$dsmod_cn.' } else { dsmod user $dsuser' .$dsmod.' }';
+		
+		$moduser[] = ($uuid?$dsmod_uuid:$dsmod_cn);
 		
 		$t[] = array($class,$last.' | '.$first,($username),($email),$password);
 		
@@ -268,7 +301,9 @@ function controller()
 		saveFile($dlpath."emails_for_groups.ps1",$groupsPS);
 
 	if($SETTINGS['renamecn'])
-		saveFile($dlpath."rename_old_cn.ps1",$renamecn);
+	 	saveFile($dlpath."rename_old_cn.ps1",$renamecn);
+	if($SETTINGS['usercheck'])
+		saveFile($dlpath."user_check.ps1",$usercheck);
 	
 	saveFile($dlpath."rename_homes.ps1",$renamehome);
 	
@@ -302,6 +337,8 @@ function renderResults($hash)
 	$zipfilename = 'tmp/'.$hash.'/Klassenlisten.zip';
 	if(file_exists($basedir.DS.'rename_old_cn.ps1'))
 		$downloadbuttons.= $html->link('Download prepare_users.ps1','tmp/'.$hash."/rename_old_cn.ps1").' ';
+	if(file_exists($basedir.DS.'user_check.ps1'))
+		$downloadbuttons.= $html->link('Download prepare_users.ps1','tmp/'.$hash."/user_check.ps1").' ';
 	if(file_exists($basedir.DS.'rename_homes.ps1'))
 		$downloadbuttons.= $html->link('Download rename_homes.ps1','tmp/'.$hash."/rename_homes.ps1").' ';
 	if(file_exists($basedir.DS.'users.csv'))
