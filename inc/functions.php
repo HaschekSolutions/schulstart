@@ -185,6 +185,8 @@ function controller()
 				$usergroups[] = 'net group '.$grp.' '.$username.' /add /domain';
 			}
 		}
+
+		$csvusers[] = implode(';',array($username,$password,$email,$first,$last,$class,$uuid));
 		
 		$mkuser[] = 'dsadd user "cn='.$cn.','.$ou.'" -samid '.$username.' -hmdrv H: -hmdir "'.$homedir_unc.'" -upn '.$email.' -fn "'.$first.'" -ln "'.$last.'" -email "'.$email.'" -display "'.upper($last).' '.$first.'" -pwd '.$password.' -mustchpwd '.(($SETTINGS['mustchangepw']==1)?'yes':'no').' -disabled no -canchpwd '.(($SETTINGS['cantchangepw']=='1')?'no':'yes').($uuid?' -empid '.$uuid:'');
 		
@@ -256,6 +258,8 @@ function controller()
 	
 	saveFile($dlpath."domaincontroller.txt",$mkuser);
 	saveFile($dlpath."domaincontroller.txt",$moduser,true);
+
+	file_put_contents($dlpath."users.csv",implode("\n",$csvusers));
 	
 	saveFile($dlpath."domaincontroller.txt",$groups,true);
 	saveFile($dlpath."domaincontroller.txt",$usergroups,true);
@@ -293,11 +297,15 @@ function renderResults($hash)
 		exit('Fehler');
 	$html = new HTML;
 
+	$downloadbuttons = '';
+
 	$zipfilename = 'tmp/'.$hash.'/Klassenlisten.zip';
 	if(file_exists($basedir.DS.'rename_old_cn.ps1'))
 		$downloadbuttons.= $html->link('Download prepare_users.ps1','tmp/'.$hash."/rename_old_cn.ps1").' ';
 	if(file_exists($basedir.DS.'rename_homes.ps1'))
 		$downloadbuttons.= $html->link('Download rename_homes.ps1','tmp/'.$hash."/rename_homes.ps1").' ';
+	if(file_exists($basedir.DS.'users.csv'))
+		$downloadbuttons.= $html->link('Download users.csv','tmp/'.$hash."/users.csv").' ';
 	$downloadbuttons.= $html->link('Download domaincontroller.txt','tmp/'.$hash."/domaincontroller.txt").' ';
 	if(file_exists($basedir.DS.'emails_for_groups.ps1'))
 		$downloadbuttons.= $html->link('Download emails_for_groups.ps1','tmp/'.$hash."/emails_for_groups.ps1").' ';
